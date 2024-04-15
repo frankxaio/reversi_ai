@@ -91,14 +91,19 @@ class Reversi:
         self.black_player = Player(self.BLACK)
         self.white_player = Player(self.WHITE)
 
+        # Timer
+        self.black_timer = 0
+        self.white_timer = 0
+
         # creating the board as 64 tiles
         self.board = OrderedDict((Coord(i, j), self.EMPTY) for i in range(8) for j in range(8))
         
         # placing the initial stones
-        self.board[Coord(3, 3)] = self.white_player.field
-        self.board[Coord(4, 4)] = self.white_player.field
-        self.board[Coord(3, 4)] = self.black_player.field
-        self.board[Coord(4, 3)] = self.black_player.field
+        # 更改黑子與白子的位置
+        self.board[Coord(3, 3)] = self.black_player.field
+        self.board[Coord(4, 4)] = self.black_player.field
+        self.board[Coord(3, 4)] = self.white_player.field
+        self.board[Coord(4, 3)] = self.white_player.field
 
         # player is the current player
         self.player = self.black_player
@@ -163,6 +168,13 @@ class Reversi:
         return coord in self.available_fields()
 
     def play(self, coord):
+
+        # 更新計時器
+        # if self.player == self.black_player:
+        #     self.black_timer += 1
+        # else:
+        #     self.white_timer += 1
+
         if self.game_state != self.GAME_STATES['IN_PROGRESS']:
             raise GameHasEndedError('Game has already ended')
         if not self.is_valid_move(coord):

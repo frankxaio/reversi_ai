@@ -62,6 +62,7 @@ def root():
 #     return app.send_static_file('script.js')
 
 
+
 @app.route('/game/<id>')
 def game(id):
     try:
@@ -69,7 +70,7 @@ def game(id):
     except KeyError as e:
         return '', 404
 
-
+# New
 @app.route('/games')
 def all_games():
     return dumps([public_game_info(game) for game in games.values()])

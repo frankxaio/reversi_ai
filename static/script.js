@@ -1,7 +1,7 @@
 
 var log = function (x) { return console.log(arguments), x; },
   parse = JSON.parse,
-  filter = function(obj, keys) {
+  filter = function (obj, keys) {
     var result = {};
     for (var key in obj)
       if (keys.indexOf(key) != -1)
@@ -27,7 +27,7 @@ var log = function (x) { return console.log(arguments), x; },
     return info;
   },
   render = function (templateId, data) {
-    return id(templateId).innerHTML.replace(/\{\{(.*?)\}\}/g, function(_, key){
+    return id(templateId).innerHTML.replace(/\{\{(.*?)\}\}/g, function (_, key) {
       return data[key];
     });
   },
@@ -46,35 +46,35 @@ var log = function (x) { return console.log(arguments), x; },
 
     location.hash = '/game/' + data.id;
   },
-  getName = function(){
+  getName = function () {
     return prompt("Please enter your name", "");
   }
 
 $(document)
 
   //  On clicking New Game The Box Slides Down or Up
-  .on('click', 'button#new', function(){
+  .on('click', 'button#new', function () {
     $('#message').html(id('/new-game').innerHTML).slideDown();
   })
-  .on('click', 'button#cancel', function(){
+  .on('click', 'button#cancel', function () {
     $('#message').slideUp();
     return false;
   })
 
   // spectate button to watch games in all games list
-  .on('click', 'button.watch', function(e){
-    location.hash = '/game/'+ $(e.target).parent().data('id');
+  .on('click', 'button.watch', function (e) {
+    location.hash = '/game/' + $(e.target).parent().data('id');
   })
 
   //  send post message for creating a new game
-  .on('submit', '#new-game', function(e){
+  .on('submit', '#new-game', function (e) {
     e.preventDefault();
     $('#message').hide();
-    $.post('/create', {name: id('name').value, ai: id('has-ai').checked}, enterGame);
+    $.post('/create', { name: id('name').value, ai: id('has-ai').checked }, enterGame);
   })
 
 
-  .on('click', 'button.join', function(){
+  .on('click', 'button.join', function () {
     var data = {
       id: $(this).parent().parent().data('id'),
       place: $(this).parent().attr('class'),
@@ -84,14 +84,14 @@ $(document)
   })
 
   //  handles clicking on a tile
-  .on('click', '#game td', function(){
+  .on('click', '#game td', function () {
     var data = filter(parse(LS.GAME), ['id', 'white_token', 'black_token'])
     data['idx'] = $('#game td').index(this) // row, col
     $.post('/play', data)
   })
 
 
-  .on('click', 'a[href$="#/game"]', function(){
+  .on('click', 'a[href$="#/game"]', function () {
     if (LS.GAME)
       return location.hash = '/game/' + parse(LS.GAME).id, false;
     return alert('You are not currently in a game'), false;
@@ -99,10 +99,10 @@ $(document)
 
 
 var actions = {
-  game: function(data){
+  game: function (data) {
     load('/game', game(data));
   },
-  games: function(data){
+  games: function (data) {
     load('/games');
     $('#active-games').html(data.map(function (e) {
       return render('/game-state', e).replace('null', '<button class="join">Sit</button>')
@@ -113,7 +113,7 @@ var actions = {
 
 window.onhashchange = function (e) {
   var page = location.hash.slice(2);
-  $.get(page, function (data){
+  $.get(page, function (data) {
     actions[page.split('/')[0]](parse((data)));
   });
   return false;
@@ -122,3 +122,4 @@ if (location.hash == '')
   location.hash = '/games';
 
 setInterval(window.onhashchange, 1000)
+
