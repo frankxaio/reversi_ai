@@ -1,5 +1,0 @@
-# Reversi Game Play 
-
-
-
-- [ ] 
