@@ -2,7 +2,9 @@ import pygame, sys, random, time
 from pygame.locals import *
 from tool import *
 from AI import *
+from gui import *
 
+# GUI
 BACKGROUNDCOLOR = (255, 255, 255)
 BLACK = (0, 0, 0)
 YELLOW = (255, 255, 22)
@@ -13,11 +15,9 @@ PIECEHEIGHT = 44
 BOARDX = 0
 BOARDY = 0
 FPS = 40
+game_window_extend = 100
 
-# 退出
-def terminate():
-    pygame.quit()
-    sys.exit()
+
 
 if __name__ == '__main__':
     # initialize
@@ -49,7 +49,7 @@ if __name__ == '__main__':
     print(turn)
 
     # 遊戲視窗
-    windowSurface = pygame.display.set_mode((boardRect.width, boardRect.height))
+    windowSurface = pygame.display.set_mode((boardRect.width+game_window_extend, boardRect.height))
     pygame.display.set_caption('黑白棋')
 
     gameOver = False
@@ -88,9 +88,11 @@ if __name__ == '__main__':
         if score['black'] == 0 or score['white'] == 0 or isGameOver(mainBoard):
             gameOver = True
 
+        # windowSurface.fill(BACKGROUNDCOLOR)
+        # windowSurface.blit(boardImage, boardRect, boardRect)
 
-        windowSurface.fill(BACKGROUNDCOLOR)
-        windowSurface.blit(boardImage, boardRect, boardRect)
+        # 顯示記分板
+        ScoreBoard(mainBoard, windowSurface)
 
         validMoves = getValidMoves(mainBoard, playerTile)
 
@@ -117,7 +119,7 @@ if __name__ == '__main__':
             elif scorePlayer == scoreComputer:
                 outputStr = "Tie. " + str(scorePlayer) + ":" + str(scoreComputer)
             else:
-                outputStr = "Los. " + str(scorePlayer) + ":" + str(scoreComputer)
+                outputStr = "Loss. " + str(scorePlayer) + ":" + str(scoreComputer)
             text = basicFont.render(outputStr, True, BLACK, YELLOW)
             textRect = text.get_rect()
             textRect.centerx = windowSurface.get_rect().centerx
