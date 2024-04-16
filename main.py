@@ -91,7 +91,7 @@ if __name__ == '__main__':
             makeMove(mainBoard, computerTile, x, y)
             savex, savey = x, y
             total_computer_time += total_computer_time
-            print(f'AI takes: {timer:.4f} seconds')
+            print(f'AI takes: {timer:.4f}s')
             start_player = time.time()
 
             # 玩家没有可行的走法了
@@ -146,7 +146,7 @@ if __name__ == '__main__':
                 # print("這段代碼只會執行一次")
                 # 設定已執行過的 flag
                 has_executed = True
-                print(f"Total player time: {total_player_time:.2f} seconds")
-                print(f"Total computer time: {total_computer_time:.2f} seconds")
+                print(f"Total player time: {total_player_time:.2f}s")
+                print(f"Total computer time: {total_computer_time:.2f}s")
 
         pygame.display.update()
