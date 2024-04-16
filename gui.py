@@ -21,22 +21,29 @@ def terminate():
     sys.exit()
 
 # 記分板
-def ScoreBoard(board,windowSurface):
-    boardImage = pygame.image.load('board.png')
+def ScoreBoard(board,windowSurface, total_player_time, total_computer_time):
+    boardImage = pygame.image.load('Image/board.png')
     boardRect = boardImage.get_rect()
 
     blackCount = getScoreOfBoard(board)['black']
     whiteCount = getScoreOfBoard(board)['white']
 
     # Rendering the count on the window
-    smallFont = pygame.font.SysFont(None, 28)
-    blackCountText = smallFont.render(f'Black: {blackCount}', True, BLACK)
-    whiteCountText = smallFont.render(f'White: {whiteCount}', True, BLACK)
+    smallFont = pygame.font.SysFont(None, 22)
+    blackCountText = smallFont.render(f'Black:{blackCount}', True, BLACK)
+    whiteCountText = smallFont.render(f'White:{whiteCount}', True, BLACK)
+    PlayerTimeText = smallFont.render(f'Timer:{total_player_time:.2f}', True, BLACK)
+    ComputerTimeText = smallFont.render(f'Timer:{total_computer_time:.2f}', True, BLACK)
+
 
     textMargin = 10
     textSpacing = 30
-    windowSurface.blit(blackCountText, (boardRect.width + textMargin, textMargin))
-    windowSurface.blit(whiteCountText, (boardRect.width + textMargin, textMargin + textSpacing))
+    # windowSurface.blit(blackCountText, (boardRect.width + textMargin, textMargin))
+    # windowSurface.blit(whiteCountText, (boardRect.width + textMargin, textMargin + textSpacing))
+    windowSurface.blit(blackCountText, (2, boardRect.height+6))
+    windowSurface.blit(whiteCountText, (boardRect.width-70, boardRect.height+6))
+    windowSurface.blit(PlayerTimeText, (70, boardRect.height+6))
+    windowSurface.blit(ComputerTimeText, (boardRect.width-150, boardRect.height+6))
 
 
 # def ShowGameOver(board, windowSurface):

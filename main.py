@@ -5,7 +5,7 @@ from AI import *
 from gui import *
 
 # GUI
-BACKGROUNDCOLOR = (255, 255, 255)
+BACKGROUNDCOLOR = (246, 244, 221)
 BLACK = (0, 0, 0)
 YELLOW = (255, 255, 22)
 CELLWIDTH = 50
@@ -25,11 +25,11 @@ if __name__ == '__main__':
     pygame.init()
 
     # load image
-    boardImage = pygame.image.load('board.png')
+    boardImage = pygame.image.load('Image\\board.png')
     boardRect = boardImage.get_rect()
-    blackImage = pygame.image.load('black.png')
+    blackImage = pygame.image.load('Image\\black_v2.png')
     blackRect = blackImage.get_rect()
-    whiteImage = pygame.image.load('white.png')
+    whiteImage = pygame.image.load('Image\\white_v2.png')
     whiteRect = whiteImage.get_rect()
 
     basicFont = pygame.font.SysFont(None, 48)
@@ -49,7 +49,7 @@ if __name__ == '__main__':
     print(turn)
 
     # 遊戲視窗
-    windowSurface = pygame.display.set_mode((boardRect.width+game_window_extend, boardRect.height))
+    windowSurface = pygame.display.set_mode((boardRect.width, boardRect.height+25))
     pygame.display.set_caption('黑白棋')
 
     # 初始化:
@@ -68,13 +68,13 @@ if __name__ == '__main__':
             if isGameOver(mainBoard) == False and turn == 'player' and event.type == MOUSEBUTTONDOWN and event.button == 1:
                 x, y = pygame.mouse.get_pos()
                 end_player = time.time()
-                timer_player = end_player - start_player
-                total_player_time += timer_player
-                print(f"Player takes : {timer_player:.2f}s")
                 # 滑鼠點擊對應到棋盤的位置
                 col = int((x - BOARDX) / CELLWIDTH)
                 row = int((y - BOARDY) / CELLHEIGHT)
                 if makeMove(mainBoard, playerTile, col, row) == True:
+                    timer_player = end_player - start_player
+                    total_player_time += timer_player
+                    print(f"Player takes : {timer_player:.2f}s")
                     if getValidMoves(mainBoard, computerTile) != []:
                         turn = 'computer'
             if event.type == KEYUP:
@@ -106,7 +106,7 @@ if __name__ == '__main__':
         windowSurface.blit(boardImage, boardRect, boardRect)
 
         # 顯示記分板
-        ScoreBoard(mainBoard, windowSurface)
+        ScoreBoard(mainBoard, windowSurface, total_player_time, total_computer_time)
 
         validMoves = getValidMoves(mainBoard, playerTile)
 
