@@ -16,13 +16,13 @@ BOARDX = 0
 BOARDY = 0
 FPS = 40
 game_window_extend = 100
-
+textMargin = 10
+textSpacing = 30
 
 
 if __name__ == '__main__':
     # initialize
     pygame.init()
-    mainClock = pygame.time.Clock()
 
     # load image
     boardImage = pygame.image.load('board.png')
@@ -52,33 +52,47 @@ if __name__ == '__main__':
     windowSurface = pygame.display.set_mode((boardRect.width+game_window_extend, boardRect.height))
     pygame.display.set_caption('黑白棋')
 
+    # 初始化:
     gameOver = False
+    start_player = time.time()
+    total_player_time = 0
+    total_computer_time = 0
+    has_executed = False
 
     # 遊戲主循環
     while True:
         for event in pygame.event.get():
             if event.type == QUIT:
                 terminate()
+            # 玩家下棋
             if isGameOver(mainBoard) == False and turn == 'player' and event.type == MOUSEBUTTONDOWN and event.button == 1:
                 x, y = pygame.mouse.get_pos()
+                end_player = time.time()
+                timer_player = end_player - start_player
+                total_player_time += timer_player
+                print(f"Player takes : {timer_player:.2f}s")
+                # 滑鼠點擊對應到棋盤的位置
                 col = int((x - BOARDX) / CELLWIDTH)
                 row = int((y - BOARDY) / CELLHEIGHT)
                 if makeMove(mainBoard, playerTile, col, row) == True:
                     if getValidMoves(mainBoard, computerTile) != []:
                         turn = 'computer'
-
             if event.type == KEYUP:
                 if event.key == K_q:
                     turn = 'computer'
 
+        # 顯示棋盤
         windowSurface.fill(BACKGROUNDCOLOR)
         windowSurface.blit(boardImage, boardRect, boardRect)
 
-
+        # 電腦下棋
         if (isGameOver(mainBoard) == False and turn == 'computer'):
-            x, y = getComputerMove(mainBoard, computerTile)
+            x, y, timer = getComputerMove(mainBoard, computerTile)
             makeMove(mainBoard, computerTile, x, y)
             savex, savey = x, y
+            total_computer_time += total_computer_time
+            print(f'AI takes: {timer:.4f} seconds')
+            start_player = time.time()
 
             # 玩家没有可行的走法了
             if getValidMoves(mainBoard, playerTile) != []:
@@ -88,8 +102,8 @@ if __name__ == '__main__':
         if score['black'] == 0 or score['white'] == 0 or isGameOver(mainBoard):
             gameOver = True
 
-        # windowSurface.fill(BACKGROUNDCOLOR)
-        # windowSurface.blit(boardImage, boardRect, boardRect)
+        windowSurface.fill(BACKGROUNDCOLOR)
+        windowSurface.blit(boardImage, boardRect, boardRect)
 
         # 顯示記分板
         ScoreBoard(mainBoard, windowSurface)
@@ -126,6 +140,13 @@ if __name__ == '__main__':
             textRect.centery = windowSurface.get_rect().centery
             windowSurface.blit(text, textRect)
 
+            # 印出總時間
+            if not has_executed:
+                # 執行需要只執行一次的代碼
+                # print("這段代碼只會執行一次")
+                # 設定已執行過的 flag
+                has_executed = True
+                print(f"Total player time: {total_player_time:.2f} seconds")
+                print(f"Total computer time: {total_computer_time:.2f} seconds")
 
         pygame.display.update()
-        mainClock.tick(FPS)

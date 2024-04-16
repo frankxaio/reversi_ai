@@ -1,6 +1,11 @@
 from tool import *
+import time
+import datetime
+from copy import deepcopy
+
 
 def getComputerMove(board, computerTile):
+    start = time.time()
     # 獲取所有合法路徑
     possibleMoves = getValidMoves(board, computerTile)
 
@@ -21,17 +26,8 @@ def getComputerMove(board, computerTile):
         if score < bestScore:
             bestMove = [x, y]
             bestScore = score
+    end=time.time()
+    timer=end-start
+    bestMove = [bestMove[0], bestMove[1], timer]
     return bestMove
 
-# # 電腦走法，AI, rewrite
-# def getComputerMove(board, computerTile):
-#
-#     possibleMoves = getValidMoves(board, computerTile) # 获取所有合法走法
-#     print(possibleMoves)  # for test
-#     predict = []
-#     for pos in possibleMoves: # 对所有走法进行尝试，用蒙特卡洛树算法进行搜索，最后选择模拟胜率最高的一个走法
-#         MCTree = MCTS(board, pos, computerTile)  # MCTree 是蒙特卡洛树的一个对象， 输入当前棋盘和打算下棋位置
-#         predict.append(MCTree.evaluate())  # 返回一个（位置，胜率）
-#
-#     # 从预测列表中选出一个胜率最大的位置
-#     return predict[0]
