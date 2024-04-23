@@ -83,8 +83,13 @@ def isOnBoard(x, y):
 
 # 獲取合法位置
 def getValidMoves(board, tile):
+    """
+    possibleMoves 以二維陣列的方式呈現, [[2, 4], [4, 2], [5, 3], [3, 5]] 代表有四個合法路徑為 x = 2, y = 4,...
+    para: board: 棋盤用二維陣列表示，`black` 代表黑子，`white` 代表白子，`none` 代表空格。
+    tile: 現在輪到的玩家，`black` 或 `white`
+    return: 以二維陣列的方式呈現所有合法路徑
+    """
     validMoves = []
-
     for x in range(8):
         for y in range(8):
             if isValidMove(board, tile, x, y) != False:
@@ -94,6 +99,10 @@ def getValidMoves(board, tile):
 
 # 棋盤雙方黑白子的分數
 def getScoreOfBoard(board):
+    """
+    para: board: 棋盤用二維陣列表示，`black` 代表黑子，`white` 代表白子，`none` 代表空格。
+    return: 黑白雙方的分數
+    """
     xscore = 0
     oscore = 0
     for x in range(8):

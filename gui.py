@@ -43,8 +43,21 @@ def ScoreBoard(board,windowSurface, total_player_time, total_computer_time):
     windowSurface.blit(blackCountText, (2, boardRect.height+6))
     windowSurface.blit(whiteCountText, (boardRect.width-70, boardRect.height+6))
     windowSurface.blit(PlayerTimeText, (70, boardRect.height+6))
-    windowSurface.blit(ComputerTimeText, (boardRect.width-150, boardRect.height+6))
+    windowSurface.blit(ComputerTimeText, (boardRect.width-160, boardRect.height+6))
 
+def ShowStones(mainBoard, windowSurface, validMoves, blackImage, blackRect, whiteImage, whiteRect):
+    # 在介面畫出棋子
+    for x in range(8):
+        for y in range(8):
+            # 計算標記的位置
+            rectDst = pygame.Rect(BOARDX + x * CELLWIDTH + 2, BOARDY + y * CELLHEIGHT + 2, PIECEWIDTH, PIECEHEIGHT)
+            if mainBoard[x][y] == 'black':
+                windowSurface.blit(blackImage, rectDst, blackRect)
+            elif mainBoard[x][y] == 'white':
+                windowSurface.blit(whiteImage, rectDst, whiteRect)
+            # 繪製玩家可走路徑
+            if [x, y] in validMoves:
+                pygame.draw.circle(windowSurface, (136,196,255), rectDst.center, 18, 3)
 
 # def ShowGameOver(board, windowSurface):
 #     if isGameOver(board) == True:

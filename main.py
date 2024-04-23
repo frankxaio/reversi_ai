@@ -87,11 +87,13 @@ if __name__ == '__main__':
 
         # 電腦下棋
         if (isGameOver(mainBoard) == False and turn == 'computer'):
-            x, y, timer = getComputerMove(mainBoard, computerTile)
+            # x, y, timer = getComputerMove(mainBoard, computerTile)
+            x, y, computer_time = UseMinMax(mainBoard, computerTile, 4)
+
             makeMove(mainBoard, computerTile, x, y)
             savex, savey = x, y
-            total_computer_time += total_computer_time
-            print(f'AI takes: {timer:.4f}s')
+            total_computer_time += computer_time
+            print(f'AI takes: {computer_time:.4f}s')
             start_player = time.time()
 
             # 玩家没有可行的走法了
@@ -110,19 +112,7 @@ if __name__ == '__main__':
 
         validMoves = getValidMoves(mainBoard, playerTile)
 
-        # 在介面畫出棋子
-        for x in range(8):
-            for y in range(8):
-                # 計算標記的位置
-                rectDst = pygame.Rect(BOARDX + x * CELLWIDTH + 2, BOARDY + y * CELLHEIGHT + 2, PIECEWIDTH, PIECEHEIGHT)
-                if mainBoard[x][y] == 'black':
-                    windowSurface.blit(blackImage, rectDst, blackRect)
-                elif mainBoard[x][y] == 'white':
-                    windowSurface.blit(whiteImage, rectDst, whiteRect)
-                # 繪製合法路徑
-                if [x, y] in validMoves:
-                    pygame.draw.circle(windowSurface, (136,196,255), rectDst.center, 18, 3)
-
+        ShowStones(mainBoard, windowSurface, validMoves, blackImage, blackRect, whiteImage, whiteRect)
 
         # 檢查遊戲結束
         if isGameOver(mainBoard) == True:
