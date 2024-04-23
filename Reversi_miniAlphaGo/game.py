@@ -48,7 +48,7 @@ class Game(object):
         :param is_timeout: 時間是否超時，默認不超時
         :param is_board: 是否修改棋盤
         :param is_legal: 落子是否合法
-        :return: 贏家（0,1）,棋子差 0
+        :return: 贏家(0,1),棋子差 0
         """
 
         if self.current_player == self.black_player:
@@ -98,6 +98,7 @@ class Game(object):
             color = "X" if self.current_player == self.black_player else "O"
             # 獲取當前下棋方合法落子位置
             legal_actions = list(self.board.get_legal_actions(color))
+            print(f"legal_actions:{legal_actions}")
             # print("%s合法落子坐標列表："%color,legal_actions)
             if len(legal_actions) == 0:
                 # 判斷遊戲是否結束
@@ -201,7 +202,6 @@ class Game(object):
         # 如果當前選手沒有合法下棋的位子，則切換選手；如果另外一個選手也沒有合法的下棋位置，則比賽停止。
         b_list = list(self.board.get_legal_actions('X'))
         w_list = list(self.board.get_legal_actions('O'))
-
         is_over = len(b_list) == 0 and len(w_list) == 0  # 返回值 True/False
 
         return is_over

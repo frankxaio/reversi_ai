@@ -1,6 +1,10 @@
 #!/usr/bin/Anaconda3/python
 # -*- coding: utf-8 -*-
 
+from rich import print
+from rich.console import Console
+import copy
+
 class Board(object):
     """
     Board 黑白棋棋盤，規格是8*8，黑棋用 X 表示，白棋用 O 表示，未落子時用 . 表示。
@@ -31,14 +35,20 @@ class Board(object):
         :param total_time: 總耗時, 比如:{"X":1,"O":0},默認值是None
         :return:
         """
-        board = self._board
+        board_print = copy.deepcopy(self._board)
+        for i in range(8):
+            for j in range(8):
+                if 'X' == board_print[i][j]:
+                    board_print[i][j] = '[bold blue]X[/bold blue]'
+                if 'O' == board_print[i][j]:
+                    board_print[i][j] = '[red]O[/red]'
         # print(step_time,total_time)
         # 打印列名
         print(' ', ' '.join(list('ABCDEFGH')))
         # 打印行名和棋盤
         for i in range(8):
             # print(board)
-            print(str(i + 1), ' '.join(board[i]))
+            print('[white]'+str(i + 1), ' '.join(board_print[i]))
         if (not step_time) or (not total_time):
             # 棋盤初始化時展示的時間
             step_time = {"X": 0, "O": 0}
@@ -72,7 +82,7 @@ class Board(object):
     def get_winner(self):
         """
         判斷黑棋和白旗的輸贏，通過棋子的個數進行判斷
-        :return: 0-黑棋贏，1-白旗贏，2-表示平局，黑棋個數和白旗個數相等
+        :return: 0-黑棋贏, 1-白旗贏, 2-表示平局，黑棋個數和白旗個數相等
         """
         # 定義黑白棋子初始的個數
         black_count, white_count = 0, 0
@@ -84,10 +94,10 @@ class Board(object):
                 # 統計白旗棋子的個數
                 if self._board[i][j] == 'O':
                     white_count += 1
-        if black_count > white_count:
+        if black_count < white_count:
             # 黑棋勝
             return 0, black_count - white_count
-        elif black_count < white_count:
+        elif black_count > white_count:
             # 白棋勝
             return 1, white_count - black_count
         elif black_count == white_count:
@@ -99,7 +109,7 @@ class Board(object):
         落子並獲取反轉棋子的坐標
         :param action: 落子的坐標 可以是 D3 也可以是(2,3)
         :param color: [O,X,.] 表示棋盤上不同的棋子
-        :return: 返回反轉棋子的坐標列表，落子失敗則返回False
+        :return: 返回反轉棋子的坐標列表, 落子失敗則返回False
         """
         # 判斷action 是不是字符串，如果是則轉化為數字坐標
         if isinstance(action, str):
@@ -155,7 +165,7 @@ class Board(object):
 
     def _can_fliped(self, action, color):
         """
-        檢測落子是否合法,如果不合法，返回 False，否則返回反轉子的坐標列表
+        檢測落子是否合法,如果不合法，返回 False,否則返回反轉子的坐標列表
         :param action: 下子位置
         :param color: [X,0,.] 棋子狀態
         :return: False or 反轉對方棋子的坐標列表
@@ -228,8 +238,8 @@ class Board(object):
     def get_legal_actions(self, color):
         """
         按照黑白棋的規則獲取棋子的合法走法
-        :param color: 不同顏色的棋子，X-黑棋，O-白棋
-        :return: 生成合法的落子坐標，用list()方法可以獲取所有的合法坐標
+        :param color: 不同顏色的棋子, X-黑棋, O-白棋
+        :return: 生成合法的落子坐標, 用list()方法可以獲取所有的合法坐標
         """
         # 表示棋盤坐標點的8個不同方向坐標，比如方向坐標[0][1]則表示坐標點的正上方。
         direction = [(-1, 0), (-1, 1), (0, 1), (1, 1), (1, 0), (1, -1), (0, -1), (-1, -1)]
@@ -278,7 +288,7 @@ class Board(object):
         """
         數字坐標轉化為棋盤坐標
         :param action:數字坐標 ,比如(0,0)
-        :return:棋盤坐標，比如 （0,0）---> A1
+        :return:棋盤坐標，比如 (0,0)---> A1
         """
         row, col = action
         l = [0, 1, 2, 3, 4, 5, 6, 7]

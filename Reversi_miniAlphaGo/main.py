@@ -1,5 +1,8 @@
-import copy
+import copy, rich
 from copy import deepcopy
+
+from rich import print
+from rich.console import Console
 
 import random
 
@@ -91,6 +94,9 @@ class HumanPlayer:
             # 如果人類玩家輸入 Q 則表示想結束比賽
             if action == "Q" or action == 'q':
                 return "Q"
+            elif len(action) == 1:
+                action = input("請'{}-{}'方輸入一個合法的坐標(e.g. 'D3'，若不想進行，請務必輸入'Q'結束遊戲。): ".format(player,
+                                                                             self.color))
             else:
                 row, col = action[1].upper(), action[0].upper()
 
@@ -140,14 +146,23 @@ def eqBoard(board1: Board, board2: Board):
     return True
 
 
-priority = [[1, 5, 3, 3, 3, 3, 5, 1],
-            [5, 5, 4, 4, 4, 4, 5, 5],
-            [3, 4, 2, 2, 2, 2, 4, 3],
-            [3, 4, 2, 2, 2, 2, 4, 3],
-            [3, 4, 2, 2, 2, 2, 4, 3],
-            [3, 4, 2, 2, 2, 2, 4, 3],
-            [5, 5, 4, 4, 4, 4, 5, 5],
-            [1, 5, 3, 3, 3, 3, 5, 1]]
+# priority = [[1, 5, 3, 3, 3, 3, 5, 1],
+#             [5, 5, 4, 4, 4, 4, 5, 5],
+#             [3, 4, 2, 2, 2, 2, 4, 3],
+#             [3, 4, 2, 2, 2, 2, 4, 3],
+#             [3, 4, 2, 2, 2, 2, 4, 3],
+#             [3, 4, 2, 2, 2, 2, 4, 3],
+#             [5, 5, 4, 4, 4, 4, 5, 5],
+#             [1, 5, 3, 3, 3, 3, 5, 1]]
+
+priority = [[5, 1, 3, 3, 3, 3, 1, 5],
+            [1, 1, 2, 2, 2, 2, 1, 1],
+            [3, 2, 4, 4, 4, 4, 2, 3],
+            [3, 2, 4, 4, 4, 4, 2, 3],
+            [3, 2, 4, 4, 4, 4, 2, 3],
+            [3, 2, 4, 4, 4, 4, 2, 3],
+            [1, 1, 2, 2, 2, 2, 1, 1],
+            [5, 1, 3, 3, 3, 3, 1, 5]]
 
 
 class AIPlayer:
@@ -190,7 +205,10 @@ class AIPlayer:
         self.node = root
         action = self.UCTSearch(max_times=self.max_times, node=root)
         # ------------------------------------------------------------------------
-
+        console = Console()
+        print("===========================")
+        console.print(f"AI action:{action}", style = 'italic magenta')
+        print("===========================")
         return action
 
     def UCTSearch(self, max_times, node):
@@ -205,7 +223,7 @@ class AIPlayer:
             leave = self.SelectPolicy(node)
             self.BackPropagate(leave)
             time_n = time.time()
-            if time_n-time_s > 50:
+            if time_n-time_s > 55:
                 break
         m = -1
         best_action = None
@@ -230,7 +248,7 @@ class AIPlayer:
             else:
                 stack = []
                 max_node = None
-                max_value = float(-1.0)
+                max_value = float(-1)
                 for i in range(len(node.children)):
                     val = node.children[i].reward / node.children[i].visits + c * pow(
                         2 * math.log(node.visits) / node.children[i].visits, 0.5)
@@ -298,26 +316,27 @@ class AIPlayer:
         :param node: 反向傳播更新的起始節點
         :return: NONE
         """
+        # res:  0-黑棋贏, 1-白旗贏, 2-表示平局，黑棋個數和白旗個數相等
         res = node.state.get_winner
         while node:
             node.visits += 1
             if res == 2:
                 if node.color == self.color:
-                    node.reward += -0.5
+                    node.reward += +0.5
                 else:
-                    node.reward += 0.5
+                    node.reward += -0.5
             elif res == 0:
                 if self.color == 'X':
                     if node.color == self.color:
-                        node.reward += -1
+                        node.reward += +1
                     else:
-                        node.reward += 1
+                        node.reward += -1
             elif res == 1:
                 if self.color == 'O':
                     if node.color == self.color:
-                        node.reward += -1
+                        node.reward += +1
                     else:
-                        node.reward += 1
+                        node.reward += -1
             node = node.parent
 
 
@@ -325,10 +344,11 @@ from game import Game
 
 # 人類玩家黑棋初始化
 # black_player = AIPlayer("X", 60)
-black_player  = HumanPlayer("X")
+# black_player  = HumanPlayer("X")
+black_player  = AIPlayer("X", 500)
 
 # AI 玩家 白棋初始化
-white_player = AIPlayer("O", 60)
+white_player = AIPlayer("O", 100)
 
 # 遊戲初始化，第一個玩家是黑棋，第二個玩家是白棋
 game = Game(black_player, white_player)
