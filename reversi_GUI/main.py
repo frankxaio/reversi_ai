@@ -54,10 +54,10 @@ if __name__ == '__main__':
 
     # 初始化:
     gameOver = False
-    start_player = time.time()
-    total_player_time = 0
-    total_computer_time = 0
-    has_executed = False
+    # start_player = time.time()
+    # total_player_time = 0
+    # total_computer_time = 0
+    # has_executed = False
 
     # 遊戲主循環
     while True:
@@ -67,14 +67,14 @@ if __name__ == '__main__':
             # 玩家下棋
             if isGameOver(mainBoard) == False and turn == 'player' and event.type == MOUSEBUTTONDOWN and event.button == 1:
                 x, y = pygame.mouse.get_pos()
-                end_player = time.time()
+                # end_player = time.time()
                 # 滑鼠點擊對應到棋盤的位置
                 col = int((x - BOARDX) / CELLWIDTH)
                 row = int((y - BOARDY) / CELLHEIGHT)
                 if makeMove(mainBoard, playerTile, col, row) == True:
-                    timer_player = end_player - start_player
-                    total_player_time += timer_player
-                    print(f"Player takes : {timer_player:.2f}s")
+                    # timer_player = end_player - start_player
+                    # total_player_time += timer_player
+                    # print(f"Player takes : {timer_player:.2f}s")
                     if getValidMoves(mainBoard, computerTile) != []:
                         turn = 'computer'
             if event.type == KEYUP:
@@ -92,8 +92,8 @@ if __name__ == '__main__':
 
             makeMove(mainBoard, computerTile, x, y)
             savex, savey = x, y
-            total_computer_time += computer_time
-            print(f'AI takes: {computer_time:.4f}s')
+            # total_computer_time += computer_time
+            # print(f'AI takes: {computer_time:.4f}s')
             start_player = time.time()
 
             # 玩家没有可行的走法了
@@ -108,7 +108,7 @@ if __name__ == '__main__':
         windowSurface.blit(boardImage, boardRect, boardRect)
 
         # 顯示記分板
-        ScoreBoard(mainBoard, windowSurface, total_player_time, total_computer_time)
+        # ScoreBoard(mainBoard, windowSurface, total_player_time, total_computer_time)
 
         validMoves = getValidMoves(mainBoard, playerTile)
 
@@ -130,13 +130,13 @@ if __name__ == '__main__':
             textRect.centery = windowSurface.get_rect().centery
             windowSurface.blit(text, textRect)
 
-            # 印出總時間
-            if not has_executed:
-                # 執行需要只執行一次的代碼
-                # print("這段代碼只會執行一次")
-                # 設定已執行過的 flag
-                has_executed = True
-                print(f"Total player time: {total_player_time:.2f}s")
-                print(f"Total computer time: {total_computer_time:.2f}s")
+            # # 印出總時間
+            # if not has_executed:
+            #     # 執行需要只執行一次的代碼
+            #     # print("這段代碼只會執行一次")
+            #     # 設定已執行過的 flag
+            #     has_executed = True
+            #     print(f"Total player time: {total_player_time:.2f}s")
+            #     print(f"Total computer time: {total_computer_time:.2f}s")
 
         pygame.display.update()
