@@ -2,8 +2,9 @@
 # -*- coding: utf-8 -*-
 
 from rich import print
-from rich.console import Console
+# from rich.console import Console
 import copy
+import numpy as np
 
 class Board(object):
     """
@@ -107,9 +108,9 @@ class Board(object):
     def _move(self, action, color):
         """
         落子並獲取反轉棋子的坐標
-        :param action: 落子的坐標 可以是 D3 也可以是(2,3)
+        :param action: 落子的坐標若是 D3 將他轉成 (2,3)
         :param color: [O,X,.] 表示棋盤上不同的棋子
-        :return: 返回反轉棋子的坐標列表, 落子失敗則返回False
+        :return: 返回反轉棋子的坐標列表, 落子失敗則返回 False
         """
         # 判斷action 是不是字符串，如果是則轉化為數字坐標
         if isinstance(action, str):
@@ -295,15 +296,41 @@ class Board(object):
         if col in l and row in l:
             return chr(ord('A') + col) + str(row + 1)
 
+    def one_hot_encoding(self):
+        """
+        將棋盤的資訊轉換成 one-hot encoding 表示，也就是將棋盤上表示成寬 8 長 8 深度為 3 的矩陣。深度也就是 channel.
+        X --> [0,1,0], O --> [0,0,1], . --> [1,0,0]
+        :return: one-hot encoding 表示的棋盤
+        """
+        board = self._board
+        board_one_hot = copy.deepcopy(board)
+        string2array = {".": np.array([1, 0, 0]), "X": np.array([0, 1, 0]), "O": np.array([0, 0, 1])}
+        for i in range(8):
+            for j in range(8):
+                board_one_hot[i][j] = string2array[board[i][j]]
+        return board_one_hot
+
     @property
     def board(self):
+        # 任何使用到 self._board 的地方都會直接修改 self._board 這個棋盤，若要複製一模一樣的棋盤要使用 deepcopy
         return self._board
 
-# # # 測試
-# if __name__ == '__main__':
-#     board = Board()  # 棋盤初始化
-#     board.display()
-#     print("----------------------------------X",list(board.get_legal_actions('X')))
-#     # print("打印D2放置為X",board._move('D2','X'))
-#     print("==========",'F1' in list(board.get_legal_actions('X')))
-#     # print('E2' in list(board.get_legal_actions('X')))
+# # 測試
+if __name__ == '__main__':
+    board = Board()  # 棋盤初始化
+
+    # 印出棋盤
+    board.display()
+
+    # one hot encoding 表示棋盤測試
+    one_hot = board.one_hot_encoding()
+    for i in range(8):
+        # 印出來不要換行，印成二維矩陣的樣子
+        for j in range(8):
+            print(one_hot[i][j], end="")
+        print()
+
+    # print("----------------------------------X",list(board.get_legal_actions('X')))
+    # print("打印D2放置為X",board._move('D2','X'))
+    # print("==========",'F1' in list(board.get_legal_actions('X')))
+    # print('E2' in list(board.get_legal_actions('X')))

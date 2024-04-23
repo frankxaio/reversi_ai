@@ -5,6 +5,8 @@ from func_timeout import func_timeout, FunctionTimedOut
 import datetime
 from board import Board
 from copy import deepcopy
+from rich import print
+
 
 
 class Game(object):
@@ -34,6 +36,20 @@ class Game(object):
             else:
                 return black_player
 
+    def game_over(self):
+        """
+        判斷遊戲是否結束
+        :return: True/False 遊戲結束/遊戲沒有結束
+        """
+
+        # 根據當前棋盤，判斷棋局是否終止
+        # 如果當前選手沒有合法下棋的位子，則切換選手；如果另外一個選手也沒有合法的下棋位置，則比賽停止。
+        b_list = list(self.board.get_legal_actions('X'))
+        w_list = list(self.board.get_legal_actions('O'))
+        is_over = len(b_list) == 0 and len(w_list) == 0  # 返回值 True/False
+
+        return is_over
+
     def print_winner(self, winner):
         """
         打印贏家
@@ -41,35 +57,6 @@ class Game(object):
         :return:
         """
         print(['黑棋獲勝!', '白棋獲勝!', '平局'][winner])
-
-    def force_loss(self, is_timeout=False, is_board=False, is_legal=False):
-        """
-         落子3個不合符規則和超時則結束遊戲,修改棋盤也是輸
-        :param is_timeout: 時間是否超時，默認不超時
-        :param is_board: 是否修改棋盤
-        :param is_legal: 落子是否合法
-        :return: 贏家(0,1),棋子差 0
-        """
-
-        if self.current_player == self.black_player:
-            win_color = '白棋 - O'
-            loss_color = '黑棋 - X'
-            winner = 1
-        else:
-            win_color = '黑棋 - X'
-            loss_color = '白棋 - O'
-            winner = 0
-
-        if is_timeout:
-            print('\n{} 思考超過 60s, {} 勝'.format(loss_color, win_color))
-        if is_legal:
-            print('\n{} 落子 3 次不符合規則,故 {} 勝'.format(loss_color, win_color))
-        if is_board:
-            print('\n{} 擅自改動棋盤判輸,故 {} 勝'.format(loss_color, win_color))
-
-        diff = 0
-
-        return winner, diff
 
     def run(self):
         """
@@ -116,7 +103,7 @@ class Game(object):
             try:
                 for i in range(0, 3):
                     # 獲取落子位置
-                    action = func_timeout(600, self.current_player.get_move,
+                    action = func_timeout(6000, self.current_player.get_move,
                                           kwargs={'board': self.board})
 
                     # 如果 action 是 Q 則說明人類想結束比賽
@@ -160,8 +147,8 @@ class Game(object):
                 if es_time > 600:
                     # 該步超過60秒則結束比賽。
                     print('\n{} 思考超過 60s'.format(self.current_player))
-                    winner, diff = self.force_loss(is_timeout=True)
-                    break
+                    # winner, diff = self.force_loss(is_timeout=True)
+                    # break
 
                 # 當前玩家顏色，更新棋局
                 self.board._move(action, color)
@@ -192,22 +179,9 @@ class Game(object):
 
             # return result,diff
 
-    def game_over(self):
-        """
-        判斷遊戲是否結束
-        :return: True/False 遊戲結束/遊戲沒有結束
-        """
 
-        # 根據當前棋盤，判斷棋局是否終止
-        # 如果當前選手沒有合法下棋的位子，則切換選手；如果另外一個選手也沒有合法的下棋位置，則比賽停止。
-        b_list = list(self.board.get_legal_actions('X'))
-        w_list = list(self.board.get_legal_actions('O'))
-        is_over = len(b_list) == 0 and len(w_list) == 0  # 返回值 True/False
 
-        return is_over
 
-#
-#
 # if __name__ == '__main__':
 #     from Human_player import HumanPlayer
 #     from Random_player import RandomPlayer
