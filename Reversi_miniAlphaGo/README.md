@@ -1,0 +1,1 @@
+reference: https://github.com/Milabo-HRH/Reversi_miniAlphaGo
