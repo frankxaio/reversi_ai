@@ -103,7 +103,7 @@ class Board(object):
             return 1, white_count - black_count
         elif black_count == white_count:
             # 表示平局，黑棋個數和白旗個數相等
-            return 2, 0
+            return 2
 
     def _move(self, action, color):
         """
@@ -300,6 +300,7 @@ class Board(object):
         """
         將棋盤的資訊轉換成 one-hot encoding 表示，也就是將棋盤上表示成寬 8 長 8 深度為 3 的矩陣。深度也就是 channel.
         X --> [0,1,0], O --> [0,0,1], . --> [1,0,0]
+        channel 0: 無子狀態, channel 1: 黑子狀態, channel 2: 白子狀態
         :return: one-hot encoding 表示的棋盤
         """
         board = self._board
@@ -308,6 +309,10 @@ class Board(object):
         for i in range(8):
             for j in range(8):
                 board_one_hot[i][j] = string2array[board[i][j]]
+        board_one_hot = np.array(board_one_hot)
+        transposed_one_hot = np.transpose(board_one_hot, (2, 0, 1)) # 原本是 (8, 8, 3) 轉換成 (3, 8, 8)
+        # print(transposed_one_hot)
+        board_one_hot = [arr.tolist() for arr in transposed_one_hot]
         return board_one_hot
 
     @property
@@ -318,19 +323,23 @@ class Board(object):
 # # 測試
 if __name__ == '__main__':
     board = Board()  # 棋盤初始化
-
+    # print(board[0][0])
     # 印出棋盤
     board.display()
 
     # one hot encoding 表示棋盤測試
-    one_hot = board.one_hot_encoding()
-    for i in range(8):
-        # 印出來不要換行，印成二維矩陣的樣子
-        for j in range(8):
-            print(one_hot[i][j], end="")
-        print()
+    # one_hot = board.one_hot_encoding()
+    # print(one_hot) # 檢查是不是 list
+    # print(np.array(one_hot).shape) # 確認維度是否為 (3, 8, 8)
 
-    # print("----------------------------------X",list(board.get_legal_actions('X')))
-    # print("打印D2放置為X",board._move('D2','X'))
-    # print("==========",'F1' in list(board.get_legal_actions('X')))
-    # print('E2' in list(board.get_legal_actions('X')))
+    # board move 落子測試
+    # board._move("D6",'X')
+    # board.display()
+
+    # get_winnter 測試
+    # get_winner = board.get_winner()
+    # print(get_winner)
+
+    # get_legal_actions 測試
+    legal_actions = list(board.get_legal_actions('X'))
+    print(legal_actions)

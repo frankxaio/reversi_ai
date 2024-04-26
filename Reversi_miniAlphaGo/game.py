@@ -6,7 +6,8 @@ import datetime
 from board import Board
 from copy import deepcopy
 from rich import print
-
+import time
+import numpy as np
 
 
 class Game(object):
@@ -60,7 +61,7 @@ class Game(object):
 
     def run(self):
         """
-        運行遊戲
+        運行遊戲，可以讓 AI 自動下棋，也可以讓人類下棋
         :return:
         """
         # 定義統計雙方下棋時間
@@ -85,8 +86,8 @@ class Game(object):
             color = "X" if self.current_player == self.black_player else "O"
             # 獲取當前下棋方合法落子位置
             legal_actions = list(self.board.get_legal_actions(color))
-            print(f"legal_actions:{legal_actions}")
-            # print("%s合法落子坐標列表："%color,legal_actions)
+            # print(f"legal_actions:{legal_actions}")
+            print("%s合法落子坐標列表："%color,legal_actions)
             if len(legal_actions) == 0:
                 # 判斷遊戲是否結束
                 if self.game_over():
@@ -105,7 +106,6 @@ class Game(object):
                     # 獲取落子位置
                     action = func_timeout(6000, self.current_player.get_move,
                                           kwargs={'board': self.board})
-
                     # 如果 action 是 Q 則說明人類想結束比賽
                     if action == "Q":
                         # 說明人類想結束遊戲，即根據棋子個數定輸贏。
@@ -179,18 +179,67 @@ class Game(object):
 
             # return result,diff
 
+     # TODO 訓練玩遊戲
+    def start_self_play(self, is_shown=False, temp=1e-3):
+        # 初始化勝負結果和棋子差
+        winner = None
+        diff = -1
+        # 遊戲開始
+        print('\n=====開始遊戲!=====\n')
+        # 棋盤初始化
+        self.board.display()
+        states, mcts_probs, current_players = [], [], []
+        # 开始自我对弈
+        _count = 0
+        while True:
+            _count += 1
+            if _count % 20 == 0:
+                start_time = time.time()
+                move, move_probs = player.get_action(self.board,
+                                                     temp=temp,
+                                                     return_prob=1)
+                print('走一步要花: ', time.time() - start_time)
+            else:
+                move, move_probs = player.get_action(self.board,
+                                                     temp=temp,
+                                                     return_prob=1)
+            # 保存自我对弈的数据
+            states.append(self.board.one_hot_encoding())
+            mcts_probs.append(move_probs)
+            self.current_player = self.switch_player(self.black_player, self.white_player)
+            # 判斷當前下棋方
+            color = "X" if self.current_player == self.black_player else "O"
+            # 獲取當前下棋方合法落子位置
+            legal_actions = list(self.board.get_legal_actions(color))
+            current_players.append(self.current_player)
+            # 执行一步落子
+            action = func_timeout(6000, self.current_player.get_move,
+                                  kwargs={'board': self.board})
+            self.board._move(action, color)
+            if self.game_over():
+                winner, diff = self.board.get_winner()  # 得到贏家 0,1,2
+                # 从每一个状态state对应的玩家的视角保存胜负信息
+                # winner == 0 代表黑子獲勝，np.zeros 代表這裡是訓練黑子方的 AI。
+                winner_x = np.zeros(len(current_players))
+                if winner != 2: # -1 表示有沒有贏家代表平局的狀態，只要不是平局就執行以下動作，這裡將 -1 改成 2，來表示黑白棋的平局狀況
+                    winner_x[np.array(current_players) == winner] = 1.0
+                    winner_x[np.array(current_players) != winner] = -1.0
+                # 重置蒙特卡洛根节点
+                player.reset_player()
+                if is_shown:
+                    if winner != 2:
+                        print("Game end. Winner is:", winner)
+                    else:
+                        print('Game end. Tie')
+
+                return winner, zip(states, mcts_probs, winner_x)
 
 
 
-# if __name__ == '__main__':
-#     from Human_player import HumanPlayer
-#     from Random_player import RandomPlayer
-#     from AIPlayer import AIPlayer
-#
-#     # x = HumanPlayer("X")
-#     x = RandomPlayer("X")
-#     o = RandomPlayer("O")
-# #     # x = AIPlayer("X")
-# #     o = AIPlayer("O")
-#     game = Game(x, o)
-#     game.run()
+if __name__ == '__main__':
+    # from Human_player import HumanPlayer
+    # from Random_player import RandomPlayer
+    # from AIPlayer import AIPlayer
+
+    game = Game()
+    game.start_self_play()
