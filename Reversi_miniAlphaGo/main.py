@@ -1,4 +1,4 @@
-import copy, rich
+import copy
 from copy import deepcopy
 
 from rich import print
@@ -343,9 +343,8 @@ class AIPlayer:
 from game import Game
 
 # 人類玩家黑棋初始化
-# black_player = AIPlayer("X", 60)
-# black_player  = HumanPlayer("X")
-black_player  = AIPlayer("X", 500)
+black_player  = HumanPlayer("X")
+# black_player  = AIPlayer("X", 500)
 
 # AI 玩家 白棋初始化
 white_player = AIPlayer("O", 100)
