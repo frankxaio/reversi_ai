@@ -244,18 +244,32 @@ class SelfPlayDataset(torch.utils.data.Dataset):
 
 
 def make_train_dataloader(dataset, batch_size=64):
+    """
+    Config dataset, batch_size, and other hyperparameters here
+    :param dataset:
+    :param batch_size:
+    :return:
+    """
     return torch.utils.data.DataLoader(
         dataset,
         batch_size=batch_size,
         shuffle=True,
-        num_workers=4,
+        num_workers=8, # cpu 八核心設置成 8
         pin_memory=True,
         drop_last=True,
     )
 
 
 def train(net, examples, epochs=10, batch_size=128):
-    torch.multiprocessing.set_start_method("fork", force=True)
+    """
+    Define training loop here
+    :param net: network
+    :param examples: game history
+    :param epochs:
+    :param batch_size:
+    :return:
+    """
+    torch.multiprocessing.set_start_method("spawn", force=True)
     opt = optim.Adam(net.parameters(), lr=1e-3, weight_decay=1e-4)
     dataloader = make_train_dataloader(SelfPlayDataset(examples), batch_size)
     net.train()
@@ -286,6 +300,12 @@ def train(net, examples, epochs=10, batch_size=128):
 
 class MCTS(object):
     def __init__(self, policy, cpuct=3, numMCTSSims=25):
+        """
+        MCTS 模擬玩遊戲
+        :param policy: 策略
+        :param cpuct: cpuct 參數
+        :param numMCTSSims: 每次進行 MCTS 搜索的次數
+        """
         self.policy = policy
         self.cpuct = cpuct
         self.numMCTSSims = numMCTSSims
@@ -509,7 +529,7 @@ class Arena(object):
 class Coach(object):
     def __init__(
         self,
-        checkpoint="checkpoints",
+        checkpoint="C:/Users/Chen_Lab01/Documents/GitHub/reversi_ai/alphazero-othello/checkpoint",
         numIters=1000,
         numEps=100,
         tempThreshold=32,
@@ -520,7 +540,7 @@ class Coach(object):
     ):
         self.numIters = numIters
         self.numEps = numEps
-        self.checkpoint = Path(checkpoint)
+        self.checkpoint = Path("checkpoints")
         self.tempThreshold = tempThreshold
         self.updateThreshold = updateThreshold
         self.maxlenOfQueue = maxlenOfQueue
@@ -539,7 +559,7 @@ class Coach(object):
         board = Board()
         p = 1
         step = 0
-        mcts = MCTS(nnet, numMCTSSims=250)
+        mcts = MCTS(nnet, numMCTSSims=1000)
 
         while True:
             step += 1
@@ -564,12 +584,13 @@ class Coach(object):
                 return sbs, sps, rs
 
     def learn(self):
-        for i in range(self.startIter, self.numIters + 1):
+        for i in range(self.startIter, self.numIters + 1): # 總共進行的模擬次數從 startIter=1 開始至 numIters=1000 結束
             print(f"########## iter {i}", sum(map(len, self.example_hist)))
             iter_examples = deque([], maxlen=self.maxlenOfQueue)
             with torch.multiprocessing.Pool(8) as p:
                 with tqdm(total=self.numEps, desc="self play", ncols=80) as pbar:
                     for examples in p.imap_unordered(
+                        # 先收集自我對練的數據
                         self.episode,
                         [(self.nnet, self.tempThreshold)] * self.numEps,
                     ):
@@ -590,12 +611,13 @@ class Coach(object):
 
             torch.save(self.nnet.state_dict(), self.checkpoint / "temp.pt")
             self.pnet.load_state_dict(torch.load(self.checkpoint / "temp.pt"))
-            pmp = MCTSPlayer(self.pnet, numMCTSSims=250)
+            pmp = MCTSPlayer(self.pnet, numMCTSSims=500)
 
+            # 蒐集數據後進行訓練
             train(self.nnet, examples)
             torch.save(self.nnet.state_dict(), self.checkpoint / f"iter{i:05d}.pt")
 
-            nmp = MCTSPlayer(self.nnet, numMCTSSims=250)
+            nmp = MCTSPlayer(self.nnet, numMCTSSims=500)
             arena = Arena(pmp, nmp)
             pwins, nwins, draws = arena.play_nktimes(self.arenaCompare // 8, 8)
             print(f"n/p wins: {nwins} / {pwins} ({draws} draws)")
@@ -616,6 +638,7 @@ class Coach(object):
         self.pnet.load_state_dict(torch.load(self.checkpoint / f"iter{i:05d}.pt"))
 
     def load_hist(self, i):
+        # 以前的對戰資料(訓練集)
         self.example_hist = torch.load(self.checkpoint / f"iter{i:05d}.examples.pt")
 
 # if __name__ == "__main__":
@@ -630,7 +653,10 @@ if __name__ == "__main__":
     torch.multiprocessing.set_start_method("spawn", force=True)
     torch.multiprocessing.set_sharing_strategy("file_system")
     C = Coach()
-    # C.load(57)
+    iteration_number_model = 50
+    iteration_number_hist = 50
+    C.load(iteration_number_model)
+    C.load_hist(iteration_number_hist)
     C.learn()
 
 # if __name__ == "__main__":

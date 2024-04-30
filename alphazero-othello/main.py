@@ -1,7 +1,8 @@
 import az, torch
+from pathlib import Path
 
 P = az.PolicyBig().cuda()
-P.load_state_dict(torch.load("model/iter00046.pt"))
+P.load_state_dict(torch.load("model/iter00049.pt"))
 
 board = az.Board()
 MP = az.MCTSPlayer(P, 0, 0, 3, 500)
