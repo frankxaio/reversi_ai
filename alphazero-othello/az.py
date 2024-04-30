@@ -554,6 +554,7 @@ class Coach(object):
     # static so we don't drag example_hist into every worker
     @staticmethod
     def episode(data):
+        # hyperparameter: numMCTSSims
         nnet, tempThreshold = data
         examples = []
         board = Board()
@@ -653,8 +654,8 @@ if __name__ == "__main__":
     torch.multiprocessing.set_start_method("spawn", force=True)
     torch.multiprocessing.set_sharing_strategy("file_system")
     C = Coach()
-    iteration_number_model = 50
-    iteration_number_hist = 50
+    iteration_number_model = 61
+    iteration_number_hist = 61
     C.load(iteration_number_model)
     C.load_hist(iteration_number_hist)
     C.learn()
