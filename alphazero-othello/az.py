@@ -254,7 +254,7 @@ def make_train_dataloader(dataset, batch_size=64):
         dataset,
         batch_size=batch_size,
         shuffle=True,
-        num_workers=8, # cpu 八核心設置成 8
+        num_workers=6,  # cpu 八核心設置成 6
         pin_memory=True,
         drop_last=True,
     )
@@ -560,7 +560,7 @@ class Coach(object):
         board = Board()
         p = 1
         step = 0
-        mcts = MCTS(nnet, numMCTSSims=1000)
+        mcts = MCTS(nnet, numMCTSSims=2500)
 
         while True:
             step += 1
@@ -612,13 +612,13 @@ class Coach(object):
 
             torch.save(self.nnet.state_dict(), self.checkpoint / "temp.pt")
             self.pnet.load_state_dict(torch.load(self.checkpoint / "temp.pt"))
-            pmp = MCTSPlayer(self.pnet, numMCTSSims=500)
+            pmp = MCTSPlayer(self.pnet, numMCTSSims=1000)
 
             # 蒐集數據後進行訓練
             train(self.nnet, examples)
             torch.save(self.nnet.state_dict(), self.checkpoint / f"iter{i:05d}.pt")
 
-            nmp = MCTSPlayer(self.nnet, numMCTSSims=500)
+            nmp = MCTSPlayer(self.nnet, numMCTSSims=1000)
             arena = Arena(pmp, nmp)
             pwins, nwins, draws = arena.play_nktimes(self.arenaCompare // 8, 8)
             print(f"n/p wins: {nwins} / {pwins} ({draws} draws)")
@@ -651,11 +651,17 @@ class Coach(object):
 #     # A.play_ntimes(2)
 
 if __name__ == "__main__":
+    if torch.cuda.is_available():
+        torch.backends.cudnn.benchmark = True
+    print("CUDA Available: ", torch.cuda.is_available())
+    print("Pytorch required cuda version: ", torch.version.cuda)
+    print("Current CUDA Device: ", torch.cuda.current_device())
+    print("Device Name: ", torch.cuda.get_device_name(torch.cuda.current_device()))
     torch.multiprocessing.set_start_method("spawn", force=True)
     torch.multiprocessing.set_sharing_strategy("file_system")
     C = Coach()
-    iteration_number_model = 61
-    iteration_number_hist = 61
+    iteration_number_model = 68
+    iteration_number_hist = 68
     C.load(iteration_number_model)
     C.load_hist(iteration_number_hist)
     C.learn()

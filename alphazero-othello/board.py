@@ -20,7 +20,7 @@ class Board(object):
     POW2 = 2 ** torch.tensor(range(64), dtype=torch.long)
 
     def __init__(self, n=8, board=None):
-        self.board_disp_ij = 1
+        self.board_disp_ij = -1
         assert n == 8
         if board is None:
             self.n = n
@@ -59,7 +59,7 @@ class Board(object):
         def char(i, j):
             if self.board[i, j] == 0:
                 if legal_moves[i, j]:
-                    return f"{Fore.GREEN}.{Style.RESET_ALL}"
+                    return f"{Fore.GREEN}v{Style.RESET_ALL}"
                 else:
                     return "·"
             elif self.board[i, j] == self.board_disp_ij: # 人類先手要設為 -1，人類後手要設為 1
