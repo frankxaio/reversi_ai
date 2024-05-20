@@ -2,10 +2,10 @@ import az, torch
 from pathlib import Path
 
 P = az.PolicyBig().cuda()
-P.load_state_dict(torch.load("model/best.pt"))
+P.load_state_dict(torch.load("model/iter00088.pt"))
 
 board = az.Board()
-MP = az.MCTSPlayer(P, 0, 0, 3, 1000)
+MP = az.MCTSPlayer(P, 0, 0, 3, 500)
 MP.init()
 A = az.Arena(MP, az.HumanPlayer())
 

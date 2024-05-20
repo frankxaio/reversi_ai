@@ -172,7 +172,7 @@ class Board(object):
             return 0
         if self.has_moves(-p):
             return 0
-        return self.reward(p)
+        return -self.reward(p)
 
     def get_symmetries(self, pi):
         assert len(pi) == self.n ** 2 + 1

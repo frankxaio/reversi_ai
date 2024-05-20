@@ -325,7 +325,7 @@ class MCTS(object):
             self.Es[s] = board.get_game_ended()
 
         if self.Es[s] != 0:
-            return -self.Es[s]
+            return self.Es[s]
 
         if s not in self.Ps:
             self.Ps[s], v = self.policy.predict_board(board)
@@ -341,7 +341,7 @@ class MCTS(object):
                 self.Ps[s] += valids
             self.Ps[s] /= self.Ps[s].sum()
             self.Vs[s] = valids
-            return -v
+            return v
 
         valids = self.Vs[s]
         best_u, best_a = -float("inf"), None
@@ -453,19 +453,19 @@ class Arena(object):
     def __init__(self, p1, p2):
         self.p1, self.p2 = p1, p2
 
-    def play(self, first=-1): # 先手是-1
+    def play(self, first=1): # 先手是-1
         players = [self.p2, None, self.p1]
         p = first
         board = Board()
         while not board.get_game_ended():
             action = players[p + 1](board)
-            print(f"{Fore.YELLOW}action: {self.ai_next_action(action)}{Style.RESET_ALL}\n")
+            # print(f"{Fore.YELLOW}action: {self.ai_next_action(action)}{Style.RESET_ALL}\n")
             board.move(action)
             board.flip()
             p *= -1
 
         torch.cuda.empty_cache()
-        return p * board.get_game_ended()
+        return -p * board.get_game_ended()
 
     def play_ntimes(self, n, verbose=False):
         self.p1.init()
@@ -560,7 +560,7 @@ class Coach(object):
         board = Board()
         p = 1
         step = 0
-        mcts = MCTS(nnet, numMCTSSims=2500)
+        mcts = MCTS(nnet, numMCTSSims=500)
 
         while True:
             step += 1
@@ -580,7 +580,7 @@ class Coach(object):
             if r != 0:
                 sbs = torch.stack([x[0].board for x in examples])
                 sps = torch.stack([x[1] for x in examples])
-                rs = [r * (-1) ** (x[2] != p) for x in examples]
+                rs = [-r * (-1) ** (x[2] != p) for x in examples]
                 torch.cuda.empty_cache()
                 return sbs, sps, rs
 
@@ -612,13 +612,13 @@ class Coach(object):
 
             torch.save(self.nnet.state_dict(), self.checkpoint / "temp.pt")
             self.pnet.load_state_dict(torch.load(self.checkpoint / "temp.pt"))
-            pmp = MCTSPlayer(self.pnet, numMCTSSims=1000)
+            pmp = MCTSPlayer(self.pnet, numMCTSSims=250)
 
             # 蒐集數據後進行訓練
             train(self.nnet, examples)
             torch.save(self.nnet.state_dict(), self.checkpoint / f"iter{i:05d}.pt")
 
-            nmp = MCTSPlayer(self.nnet, numMCTSSims=1000)
+            nmp = MCTSPlayer(self.nnet, numMCTSSims=250)
             arena = Arena(pmp, nmp)
             pwins, nwins, draws = arena.play_nktimes(self.arenaCompare // 8, 8)
             print(f"n/p wins: {nwins} / {pwins} ({draws} draws)")
@@ -660,8 +660,8 @@ if __name__ == "__main__":
     torch.multiprocessing.set_start_method("spawn", force=True)
     torch.multiprocessing.set_sharing_strategy("file_system")
     C = Coach()
-    iteration_number_model = 68
-    iteration_number_hist = 68
+    iteration_number_model = 81
+    iteration_number_hist = 81
     C.load(iteration_number_model)
     C.load_hist(iteration_number_hist)
     C.learn()
